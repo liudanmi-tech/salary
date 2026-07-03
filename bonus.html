@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>年终奖收入</title>
+<style>
+  :root{
+    --red: #F5504A;
+    --gray-bg: #F4F5F7;
+    --line: #F0F0F0;
+    --label: #333333;
+    --sub: #999999;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+    background:#e5e5e5;
+    display:flex;
+    justify-content:center;
+  }
+  .phone{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:var(--gray-bg);
+    position:relative;
+  }
+
+  .watermark{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:999;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='120'%3E%3Ctext x='0' y='70' font-size='15' font-family='-apple-system,BlinkMacSystemFont,PingFang SC,Helvetica Neue,Microsoft YaHei,sans-serif' fill='rgba(0,0,0,0.06)' transform='rotate(-30 90 60)'%3Ezhouliguo3%3C/text%3E%3C/svg%3E");
+    background-repeat:repeat;
+  }
+
+
+  /* nav bar */
+  .navbar{
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 14px 14px;
+  }
+  .navbar .side{ width:40px; display:flex; align-items:center; color:#222; font-size:20px; }
+  .navbar .side.right{ justify-content:flex-end; letter-spacing:2px; color:#222; font-size:18px; cursor:pointer; }
+  .navbar .title{ font-size:17px; font-weight:600; color:#111; }
+
+  /* record switcher (same style as the salary page's month switcher) */
+  .month-switch{
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 16px;
+    border-bottom:1px solid var(--line);
+    font-size:14px;
+    color:#666;
+  }
+  .month-switch .month{ font-size:15px; color:#333; font-weight:500; }
+  .month-switch button{
+    border:none; background:none; color:#666; font-size:14px;
+    display:flex; align-items:center; gap:2px; padding:4px; cursor:pointer;
+  }
+
+  .content{ padding:14px; }
+
+  /* paid card */
+  .paid-card{
+    border-radius:16px;
+    padding:26px 16px 30px;
+    text-align:center;
+    color:#fff;
+    background:linear-gradient(160deg,#57C9F5 0%, #1E9FEF 100%);
+    box-shadow:0 8px 20px rgba(30,159,239,.25);
+  }
+  .paid-card .label{
+    font-size:14px;
+    opacity:.92;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  .paid-card .label span.bar{ width:22px; height:1px; background:rgba(255,255,255,.7); display:inline-block; }
+  .paid-card .amount{
+    margin-top:14px;
+    font-size:42px;
+    font-weight:700;
+    letter-spacing:.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .section-title{
+    font-size:16px;
+    font-weight:700;
+    color:#111;
+    margin:20px 4px 10px;
+  }
+
+  .card{
+    background:#fff;
+    border-radius:12px;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+  }
+  .row:last-child{ border-bottom:none; }
+  .row .label{ font-size:14.5px; color:var(--label); display:flex; align-items:center; gap:5px; }
+  .row .label .hint{
+    width:14px; height:14px; border-radius:50%;
+    background:#E5E7EB; color:#999;
+    font-size:11px; line-height:14px; text-align:center;
+    font-style:normal;
+  }
+  .row .value{
+    font-size:16px;
+    color:var(--red);
+    font-weight:500;
+    font-variant-numeric: tabular-nums;
+    text-align:right;
+  }
+  .row .value.strong{ font-weight:700; }
+
+  .card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px;
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+  }
+  .card-header .total{ font-size:14px; font-weight:500; }
+  .card-header.income{ background:linear-gradient(90deg,#FF9A85,#F5504A); }
+  .card-header.deduct{ background:linear-gradient(90deg,#7FE0A0,#3FCB74); }
+  .card-header.company{ background:linear-gradient(90deg,#7FBBFF,#3E8CFF); }
+
+  .promo{
+    background:#fff;
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:16px;
+    font-size:14.5px;
+    color:#333;
+    line-height:1.9;
+  }
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+  <div class="watermark"></div>
+
+  <div class="navbar">
+    <div class="side">‹</div>
+    <div class="title">年终奖收入</div>
+    <div class="side right">•••</div>
+  </div>
+
+  <div class="month-switch">
+    <button id="prevRecord">‹ 上一条</button>
+    <div class="month" id="recordLabel">2026年02月</div>
+    <button id="nextRecord">下一条 ›</button>
+  </div>
+
+  <div class="content">
+
+    <div class="paid-card">
+      <div class="label"><span class="bar"></span>实发<span class="bar"></span></div>
+      <div class="amount" id="actualPaid">78,510.00</div>
+    </div>
+
+    <div class="promo">
+      2025年在全体京东人的坚持和协作下，我们打赢了每一场关键战役，为过去一年画上圆满句号。感谢您的辛勤与付出，新的征程已在眼前，期待您今后更精彩的表现，共创辉煌！
+    </div>
+
+    <div class="card">
+      <div class="card-header company">
+        <div>2025全年现金收入概览</div>
+      </div>
+      <div class="row">
+        <div class="label">2025全年现金收入总额<i class="hint">?</i></div>
+        <div class="value" id="cashTotal">446,187.55</div>
+      </div>
+      <div class="row">
+        <div class="label">2025全年现金收入月数<i class="hint">?</i></div>
+        <div class="value" id="cashMonths">15.39 个月</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header company">
+        <div>发放月数&amp;系数概览</div>
+      </div>
+      <div class="row">
+        <div class="label">年终奖月数</div>
+        <div class="value" id="bonusMonths">3.00 个月</div>
+      </div>
+      <div class="row">
+        <div class="label">年度出勤系数</div>
+        <div class="value" id="attendanceFactor">1.00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header deduct">
+        <div>年终奖收入</div>
+        <div class="total">合计：<span id="incomeTotal">87,000.00</span></div>
+      </div>
+      <div class="row">
+        <div class="label">固定年终奖金额</div>
+        <div class="value" id="fixedBonus">58,000.00</div>
+      </div>
+      <div class="row">
+        <div class="label">目标年终奖金额</div>
+        <div class="value" id="targetBonus">29,000.00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header income">
+        <div>扣减</div>
+        <div class="total">合计：<span id="deductTotal">8,490.00</span></div>
+      </div>
+      <div class="row">
+        <div class="label">年终奖个税金额</div>
+        <div class="value" id="bonusTax">8,490.00</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  function money(n){
+    return n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  }
+
+  // Only one record is available; prev/next are shown for visual
+  // consistency with the salary page's switcher but stay on this record.
+  var RECORD = {
+    label: '2026年02月',
+    cashTotal: 446187.55,
+    cashMonths: 15.39,
+    bonusMonths: 3.00,
+    attendanceFactor: 1.00,
+    fixedBonus: 145000.00,
+    targetBonus: 72500.00,
+    bonusTax: 42090.00
+  };
+
+  function render(){
+    var incomeTotal = RECORD.fixedBonus + RECORD.targetBonus;
+    var deductTotal = RECORD.bonusTax;
+    var actualPaid = incomeTotal - deductTotal;
+
+    document.getElementById('recordLabel').textContent = RECORD.label;
+    document.getElementById('actualPaid').textContent = money(actualPaid);
+    document.getElementById('cashTotal').textContent = money(RECORD.cashTotal);
+    document.getElementById('cashMonths').textContent = RECORD.cashMonths.toFixed(2) + ' 个月';
+    document.getElementById('bonusMonths').textContent = RECORD.bonusMonths.toFixed(2) + ' 个月';
+    document.getElementById('attendanceFactor').textContent = RECORD.attendanceFactor.toFixed(2);
+    document.getElementById('fixedBonus').textContent = money(RECORD.fixedBonus);
+    document.getElementById('targetBonus').textContent = money(RECORD.targetBonus);
+    document.getElementById('incomeTotal').textContent = money(incomeTotal);
+    document.getElementById('deductTotal').textContent = money(deductTotal);
+    document.getElementById('bonusTax').textContent = money(RECORD.bonusTax);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

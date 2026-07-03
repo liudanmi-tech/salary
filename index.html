@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>工资收入</title>
+<style>
+  :root{
+    --red: #F5504A;
+    --gray-bg: #F4F5F7;
+    --line: #F0F0F0;
+    --label: #333333;
+    --sub: #999999;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+    background:#e5e5e5;
+    display:flex;
+    justify-content:center;
+  }
+  .phone{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:var(--gray-bg);
+    position:relative;
+  }
+
+  .watermark{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:999;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='120'%3E%3Ctext x='0' y='70' font-size='15' font-family='-apple-system,BlinkMacSystemFont,PingFang SC,Helvetica Neue,Microsoft YaHei,sans-serif' fill='rgba(0,0,0,0.06)' transform='rotate(-30 90 60)'%3Ezhouliguo3%3C/text%3E%3C/svg%3E");
+    background-repeat:repeat;
+  }
+
+  /* nav bar */
+  .navbar{
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 14px 14px;
+  }
+  .navbar .side{ width:40px; display:flex; align-items:center; color:#222; font-size:20px; }
+  .navbar .side.right{ justify-content:flex-end; letter-spacing:2px; color:#222; font-size:18px; cursor:pointer; }
+  .navbar .title{ font-size:17px; font-weight:600; color:#111; }
+
+  /* month switcher */
+  .month-switch{
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 16px;
+    border-bottom:1px solid var(--line);
+    font-size:14px;
+    color:#666;
+  }
+  .month-switch .month{ font-size:15px; color:#333; font-weight:500; }
+  .month-switch button{
+    border:none; background:none; color:#666; font-size:14px;
+    display:flex; align-items:center; gap:2px; padding:4px; cursor:pointer;
+  }
+
+  /* hint banner */
+  .content{ padding:14px; }
+
+  /* paid card */
+  .paid-card{
+    border-radius:16px;
+    padding:26px 16px 30px;
+    text-align:center;
+    color:#fff;
+    background:linear-gradient(160deg,#57C9F5 0%, #1E9FEF 100%);
+    box-shadow:0 8px 20px rgba(30,159,239,.25);
+  }
+  .paid-card .label{
+    font-size:14px;
+    opacity:.92;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  .paid-card .label span.bar{ width:22px; height:1px; background:rgba(255,255,255,.7); display:inline-block; }
+  .paid-card .amount{
+    margin-top:14px;
+    font-size:42px;
+    font-weight:700;
+    letter-spacing:.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .section-title{
+    font-size:16px;
+    font-weight:700;
+    color:#111;
+    margin:20px 4px 10px;
+  }
+
+  .card{
+    background:#fff;
+    border-radius:12px;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+  }
+  .row:last-child{ border-bottom:none; }
+  .row .label{ font-size:14.5px; color:var(--label); }
+  .row .value{
+    font-size:16px;
+    color:var(--red);
+    font-weight:500;
+    font-variant-numeric: tabular-nums;
+    text-align:right;
+  }
+  .row .value.strong{ font-weight:700; }
+  .row input.value{
+    border:none;
+    background:transparent;
+    outline:none;
+    width:130px;
+    padding:0;
+    font-family:inherit;
+  }
+  .row .value.readonly{ border-bottom:none; }
+
+  .card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px;
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+  }
+  .card-header .total{ font-size:14px; font-weight:500; }
+  .card-header.income{ background:linear-gradient(90deg,#FF9A85,#F5504A); }
+  .card-header.deduct{ background:linear-gradient(90deg,#7FE0A0,#3FCB74); }
+  .card-header.company{ background:linear-gradient(90deg,#7FBBFF,#3E8CFF); }
+
+  .faq{
+    background:#fff;
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:24px;
+    font-size:13px;
+    color:#888;
+    line-height:1.9;
+  }
+  .faq .title{ font-size:14px; color:#333; font-weight:700; margin-bottom:8px; }
+  .faq .q{ color:#333; font-weight:500; margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+  <div class="watermark"></div>
+
+  <div class="navbar">
+    <div class="side">‹</div>
+    <div class="title">工资收入</div>
+    <div class="side right" id="menuBtn">•••</div>
+  </div>
+
+  <div class="month-switch">
+    <button id="prevMonth">‹ 上一月</button>
+    <div class="month" id="monthLabel">2025年06月</div>
+    <button id="nextMonth">下一月 ›</button>
+  </div>
+
+  <div class="content">
+
+    <div class="paid-card">
+      <div class="label"><span class="bar"></span>实发工资<span class="bar"></span></div>
+      <div class="amount" id="actualPaid">0.00</div>
+    </div>
+
+    <div class="section-title">工资标准</div>
+    <div class="card">
+      <div class="row">
+        <div class="label">月薪标准</div>
+        <div class="value strong readonly" id="salaryStandard">0.00</div>
+      </div>
+      <div class="row">
+        <div class="label">月薪标准-基本工资</div>
+        <input class="value" id="base" type="number" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="row">
+        <div class="label">月薪标准-固定加班费</div>
+        <input class="value" id="overtime" type="number" step="0.01" inputmode="decimal" />
+      </div>
+    </div>
+
+    <div class="card" id="performanceCard">
+      <div class="row">
+        <div class="label">绩效基数</div>
+        <input class="value" id="performanceBase" type="number" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="row">
+        <div class="label">月应发绩效基数</div>
+        <div class="value readonly" id="performanceBaseDue">0.00</div>
+      </div>
+      <div class="row">
+        <div class="label">绩效得分</div>
+        <input class="value" id="performanceScore" type="number" step="0.01" inputmode="decimal" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header income">
+        <div>收入</div>
+        <div class="total">合计：<span id="incomeTotal">0.00</span></div>
+      </div>
+      <div class="row">
+        <div class="label">月应发工资</div>
+        <div class="value readonly" id="incomeRow">0.00</div>
+      </div>
+      <div class="row" id="performancePayRow">
+        <div class="label">绩效工资</div>
+        <div class="value readonly" id="performancePay">0.00</div>
+      </div>
+      <div class="row" id="specialIncentiveRow">
+        <div class="label">专项激励（公司）</div>
+        <input class="value" id="specialIncentive" type="number" step="0.01" inputmode="decimal" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header deduct">
+        <div>扣减</div>
+        <div class="total">合计：<span id="deductTotal">0.00</span></div>
+      </div>
+      <div class="row">
+        <div class="label">缺勤扣款</div>
+        <input class="value" id="absence" type="number" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="row">
+        <div class="label">社保扣款（个人）</div>
+        <input class="value" id="socialPersonal" type="number" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="row">
+        <div class="label">公积金扣款（个人）</div>
+        <input class="value" id="fundPersonal" type="number" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="row">
+        <div class="label">个人所得税</div>
+        <input class="value" id="tax" type="number" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="row">
+        <div class="label">爱心基金</div>
+        <input class="value" id="loveFund" type="number" step="0.01" inputmode="decimal" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header company">
+        <div>公司缴纳</div>
+        <div class="total">合计：<span id="companyTotal">0.00</span></div>
+      </div>
+      <div class="row">
+        <div class="label">社保扣款（公司）</div>
+        <input class="value" id="socialCompany" type="number" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="row">
+        <div class="label">公积金扣款（公司）</div>
+        <input class="value" id="fundCompany" type="number" step="0.01" inputmode="decimal" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="border-bottom:1px solid var(--line);padding-top:16px;">
+        <div class="label" style="font-weight:700;color:#111;">其他（年度累计）</div>
+        <div></div>
+      </div>
+      <div class="row">
+        <div class="label">累计应发工资</div>
+        <div class="value readonly" id="cumIncome">0.00</div>
+      </div>
+      <div class="row">
+        <div class="label">累计社保公积金（个人）</div>
+        <div class="value readonly" id="cumSocialFund">0.00</div>
+      </div>
+      <div class="row">
+        <div class="label">累计个人所得税</div>
+        <div class="value readonly" id="cumTax">0.00</div>
+      </div>
+    </div>
+
+    <div class="faq">
+      <div class="title">常见问题：</div>
+      <div class="q">1. 问：这个月个税比上个月交的多？</div>
+      <div>答：自2019年起，个税采用累计计算方式，即：同一主体、同一年度内，每月个税税率会随着当年累计收入的提高而提高，因此年中月份到手工资可能出现递减的情况，属于正常现象。次年3-6月汇算清缴时，会以全年实际收入重新核算，多退少补。</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Mirrors data.json (generated from the source payroll spreadsheet).
+  // Keep this block and data.json in sync if the source data changes.
+  var DATA = {
+  "2025-06": {
+    "base": 24890,
+    "overtime": 5610,
+    "performanceBase": 0,
+    "performanceScore": 0,
+    "specialIncentive": 0,
+    "absence": 1326.09,
+    "socialPersonal": 3707.72,
+    "fundPersonal": 4234,
+    "tax": 1623.22,
+    "loveFund": 5,
+    "socialCompany": 9420.56,
+    "fundCompany": 4234
+  },
+  "2025-07": {
+    "base": 24890,
+    "overtime": 5610,
+    "performanceBase": 0,
+    "performanceScore": 0,
+    "specialIncentive": 400,
+    "absence": 0,
+    "socialPersonal": 3707.72,
+    "fundPersonal": 4234,
+    "tax": 1795.83,
+    "loveFund": 5,
+    "socialCompany": 9420.56,
+    "fundCompany": 4234
+  },
+  "2025-08": {
+    "base": 24890,
+    "overtime": 5610,
+    "performanceBase": 0,
+    "performanceScore": 0,
+    "specialIncentive": 0,
+    "absence": 0,
+    "socialPersonal": 3707.72,
+    "fundPersonal": 4234,
+    "tax": 2021.21,
+    "loveFund": 5,
+    "socialCompany": 9517.02,
+    "fundCompany": 4234
+  },
+  "2025-09": {
+    "base": 24890,
+    "overtime": 5610,
+    "performanceBase": 0,
+    "performanceScore": 0,
+    "specialIncentive": 0,
+    "absence": 35,
+    "socialPersonal": 3874.04,
+    "fundPersonal": 4428,
+    "tax": 3400.59,
+    "loveFund": 5,
+    "socialCompany": 9872.99,
+    "fundCompany": 4423
+  },
+  "2025-10": {
+    "base": 16560,
+    "overtime": 3740,
+    "performanceBase": 8700,
+    "performanceScore": 1,
+    "specialIncentive": 0,
+    "absence": 0,
+    "socialPersonal": 3763.16,
+    "fundPersonal": 4297,
+    "tax": 478.2,
+    "loveFund": 5,
+    "socialCompany": 9525.73,
+    "fundCompany": 4297
+  },
+  "2025-11": {
+    "base": 16560,
+    "overtime": 3740,
+    "performanceBase": 8700,
+    "performanceScore": 1,
+    "specialIncentive": 0,
+    "absence": 0,
+    "socialPersonal": 3763.16,
+    "fundPersonal": 4297,
+    "tax": 478.19,
+    "loveFund": 5,
+    "socialCompany": 9525.73,
+    "fundCompany": 4297
+  },
+  "2025-12": {
+    "base": 16560,
+    "overtime": 3740,
+    "performanceBase": 8700,
+    "performanceScore": 1,
+    "specialIncentive": 0,
+    "absence": 0,
+    "socialPersonal": 3763.16,
+    "fundPersonal": 4297,
+    "tax": 1305.56,
+    "loveFund": 5,
+    "socialCompany": 9525.73,
+    "fundCompany": 4297
+  },
+  "2026-01": {
+    "base": 16560,
+    "overtime": 3740,
+    "performanceBase": 8700,
+    "performanceScore": 0.98,
+    "specialIncentive": 0,
+    "absence": 0,
+    "socialPersonal": 3763.16,
+    "fundPersonal": 4297,
+    "tax": 389.93,
+    "loveFund": 5,
+    "socialCompany": 9525.73,
+    "fundCompany": 4297
+  },
+  "2026-02": {
+    "base": 16560,
+    "overtime": 3740,
+    "performanceBase": 8700,
+    "performanceScore": 0.98,
+    "specialIncentive": 0,
+    "absence": 0,
+    "socialPersonal": 3763.16,
+    "fundPersonal": 4297,
+    "tax": 389.93,
+    "loveFund": 5,
+    "socialCompany": 9525.73,
+    "fundCompany": 4297
+  },
+  "2026-03": {
+    "base": 16560,
+    "overtime": 3740,
+    "performanceBase": 8700,
+    "performanceScore": 0.98,
+    "specialIncentive": 0,
+    "absence": 0,
+    "socialPersonal": 3763.16,
+    "fundPersonal": 4297,
+    "tax": 599.44,
+    "loveFund": 5,
+    "socialCompany": 9525.73,
+    "fundCompany": 4297
+  },
+  "2026-04": {
+    "base": 16560,
+    "overtime": 3740,
+    "performanceBase": 8700,
+    "performanceScore": 0.96,
+    "specialIncentive": 0,
+    "absence": 0,
+    "socialPersonal": 3763.16,
+    "fundPersonal": 4297,
+    "tax": 1282.37,
+    "loveFund": 5,
+    "socialCompany": 9525.73,
+    "fundCompany": 4297
+  },
+  "2026-05": {
+    "base": 16560,
+    "overtime": 3740,
+    "performanceBase": 8700,
+    "performanceScore": 0.96,
+    "specialIncentive": 0,
+    "absence": 0,
+    "socialPersonal": 3763.16,
+    "fundPersonal": 4297,
+    "tax": 1282.37,
+    "loveFund": 5,
+    "socialCompany": 9525.73,
+    "fundCompany": 4297
+  }
+};
+</script>
+<script>
+(function(){
+  var fields = ['base','overtime','performanceBase','performanceScore','specialIncentive','absence','socialPersonal','fundPersonal','tax','loveFund','socialCompany','fundCompany'];
+  var STORAGE_PREFIX = 'salary_h5_v2_';
+  var monthKeys = Object.keys(DATA).sort();
+  var current = monthKeys[0];
+
+  function money(n){
+    n = isFinite(n) ? n : 0;
+    return n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  }
+
+  function getRecord(key){
+    var raw = localStorage.getItem(STORAGE_PREFIX + key);
+    if (raw) return JSON.parse(raw);
+    if (DATA[key]) return DATA[key];
+    var zero = {};
+    fields.forEach(function(f){ zero[f] = 0; });
+    return zero;
+  }
+
+  function saveRecord(key, data){
+    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(data));
+  }
+
+  function val(id){
+    return parseFloat(document.getElementById(id).value) || 0;
+  }
+
+  function setRowVisible(el, visible){
+    el.style.display = visible ? '' : 'none';
+  }
+
+  function fixLastVisibleBorder(card){
+    var rows = card.querySelectorAll('.row');
+    rows.forEach(function(row){ row.style.borderBottom = ''; });
+    for (var i = rows.length - 1; i >= 0; i--){
+      if (rows[i].style.display !== 'none'){
+        rows[i].style.borderBottom = 'none';
+        break;
+      }
+    }
+  }
+
+  function deriveTotals(r){
+    var salaryStandard = r.base + r.overtime;
+    var performancePay = r.performanceBase * r.performanceScore;
+    var incomeTotal = salaryStandard + performancePay + r.specialIncentive;
+    var deductTotal = r.absence + r.socialPersonal + r.fundPersonal + r.tax + r.loveFund;
+    var companyTotal = r.socialCompany + r.fundCompany;
+    var actualPaid = incomeTotal - deductTotal;
+    return { salaryStandard:salaryStandard, performancePay:performancePay, incomeTotal:incomeTotal, deductTotal:deductTotal, companyTotal:companyTotal, actualPaid:actualPaid };
+  }
+
+  function cumulativeThrough(key){
+    var year = key.slice(0,4);
+    var keysInYear = monthKeys.filter(function(k){ return k.slice(0,4)===year && k<=key; });
+    var cumIncome=0, cumSocialFund=0, cumTax=0;
+    keysInYear.forEach(function(k){
+      var r = getRecord(k);
+      var t = deriveTotals(r);
+      cumIncome += t.incomeTotal;
+      cumSocialFund += r.socialPersonal + r.fundPersonal;
+      cumTax += r.tax;
+    });
+    return { cumIncome:cumIncome, cumSocialFund:cumSocialFund, cumTax:cumTax };
+  }
+
+  function loadMonth(key){
+    current = key;
+    var r = getRecord(key);
+    fields.forEach(function(f){
+      document.getElementById(f).value = r[f];
+    });
+    var y = key.slice(0,4), m = key.slice(5,7);
+    document.getElementById('monthLabel').textContent = y + '年' + m + '月';
+    recalc();
+  }
+
+  function recalc(){
+    var r = {};
+    fields.forEach(function(f){ r[f] = val(f); });
+    saveRecord(current, r);
+
+    var t = deriveTotals(r);
+    document.getElementById('salaryStandard').textContent = money(t.salaryStandard);
+    document.getElementById('performanceBaseDue').textContent = money(r.performanceBase);
+    document.getElementById('performancePay').textContent = money(t.performancePay);
+    document.getElementById('incomeRow').textContent = money(t.salaryStandard);
+    document.getElementById('incomeTotal').textContent = money(t.incomeTotal);
+    document.getElementById('deductTotal').textContent = money(t.deductTotal);
+    document.getElementById('companyTotal').textContent = money(t.companyTotal);
+    document.getElementById('actualPaid').textContent = money(t.actualPaid);
+
+    setRowVisible(document.getElementById('performanceCard'), r.performanceBase !== 0 || r.performanceScore !== 0);
+    setRowVisible(document.getElementById('performancePayRow'), t.performancePay !== 0);
+    setRowVisible(document.getElementById('specialIncentiveRow'), r.specialIncentive !== 0);
+    fixLastVisibleBorder(document.getElementById('performanceCard'));
+    fixLastVisibleBorder(document.getElementById('specialIncentiveRow').closest('.card'));
+
+    var c = cumulativeThrough(current);
+    document.getElementById('cumIncome').textContent = money(c.cumIncome);
+    document.getElementById('cumSocialFund').textContent = money(c.cumSocialFund);
+    document.getElementById('cumTax').textContent = money(c.cumTax);
+  }
+
+  fields.forEach(function(f){
+    document.getElementById(f).addEventListener('input', recalc);
+  });
+
+  document.getElementById('prevMonth').addEventListener('click', function(){
+    var idx = monthKeys.indexOf(current);
+    if (idx > 0) loadMonth(monthKeys[idx-1]);
+  });
+  document.getElementById('nextMonth').addEventListener('click', function(){
+    var idx = monthKeys.indexOf(current);
+    if (idx < monthKeys.length-1) loadMonth(monthKeys[idx+1]);
+  });
+
+  document.getElementById('menuBtn').addEventListener('click', function(){
+    document.querySelector('.faq').scrollIntoView({ behavior:'smooth' });
+  });
+
+  loadMonth(current);
+})();
+</script>
+</body>
+</html>
