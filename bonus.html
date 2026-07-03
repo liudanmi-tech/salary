@@ -2,7 +2,12 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="年终奖收入" />
+<meta name="theme-color" content="#ffffff" />
 <title>年终奖收入</title>
 <style>
   :root{
@@ -44,11 +49,11 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:10px 14px 14px;
+    padding:calc(10px + env(safe-area-inset-top)) 14px 14px;
   }
   .navbar .side{ width:40px; display:flex; align-items:center; color:#222; font-size:20px; }
   .navbar .side.right{ justify-content:flex-end; letter-spacing:2px; color:#222; font-size:18px; cursor:pointer; }
-  .navbar .title{ font-size:17px; font-weight:600; color:#111; }
+  .navbar .title{ font-size:17px; font-weight:600; color:#111; text-decoration:none; cursor:pointer; }
 
   /* record switcher (same style as the salary page's month switcher) */
   .month-switch{
@@ -160,7 +165,7 @@
 
   <div class="navbar">
     <div class="side">‹</div>
-    <div class="title">年终奖收入</div>
+    <a class="title" href="index.html">年终奖收入</a>
     <div class="side right">•••</div>
   </div>
 
@@ -250,7 +255,6 @@
     label: '2026年02月',
     cashTotal: 446187.55,
     cashMonths: 15.39,
-    bonusMonths: 3.00,
     attendanceFactor: 1.00,
     fixedBonus: 145000.00,
     targetBonus: 72500.00,
@@ -261,12 +265,15 @@
     var incomeTotal = RECORD.fixedBonus + RECORD.targetBonus;
     var deductTotal = RECORD.bonusTax;
     var actualPaid = incomeTotal - deductTotal;
+    // 年终奖月数 = 年终奖收入合计 / 月均现金收入（2025全年现金收入总额 / 2025全年现金收入月数）
+    var avgMonthlyCash = RECORD.cashTotal / RECORD.cashMonths;
+    var bonusMonths = incomeTotal / avgMonthlyCash;
 
     document.getElementById('recordLabel').textContent = RECORD.label;
     document.getElementById('actualPaid').textContent = money(actualPaid);
     document.getElementById('cashTotal').textContent = money(RECORD.cashTotal);
     document.getElementById('cashMonths').textContent = RECORD.cashMonths.toFixed(2) + ' 个月';
-    document.getElementById('bonusMonths').textContent = RECORD.bonusMonths.toFixed(2) + ' 个月';
+    document.getElementById('bonusMonths').textContent = bonusMonths.toFixed(2) + ' 个月';
     document.getElementById('attendanceFactor').textContent = RECORD.attendanceFactor.toFixed(2);
     document.getElementById('fixedBonus').textContent = money(RECORD.fixedBonus);
     document.getElementById('targetBonus').textContent = money(RECORD.targetBonus);

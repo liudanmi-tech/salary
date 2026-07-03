@@ -2,7 +2,12 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="工资收入" />
+<meta name="theme-color" content="#ffffff" />
 <title>工资收入</title>
 <style>
   :root{
@@ -43,11 +48,11 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:10px 14px 14px;
+    padding:calc(10px + env(safe-area-inset-top)) 14px 14px;
   }
   .navbar .side{ width:40px; display:flex; align-items:center; color:#222; font-size:20px; }
   .navbar .side.right{ justify-content:flex-end; letter-spacing:2px; color:#222; font-size:18px; cursor:pointer; }
-  .navbar .title{ font-size:17px; font-weight:600; color:#111; }
+  .navbar .title{ font-size:17px; font-weight:600; color:#111; text-decoration:none; cursor:pointer; }
 
   /* month switcher */
   .month-switch{
@@ -165,7 +170,7 @@
 
   <div class="navbar">
     <div class="side">‹</div>
-    <div class="title">工资收入</div>
+    <a class="title" href="bonus.html">工资收入</a>
     <div class="side right" id="menuBtn">•••</div>
   </div>
 
