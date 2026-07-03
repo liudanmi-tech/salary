@@ -279,25 +279,6 @@
       </div>
     </div>
 
-    <div class="card">
-      <div class="row" style="border-bottom:1px solid var(--line);padding-top:16px;">
-        <div class="label" style="font-weight:700;color:#111;">其他（年度累计）</div>
-        <div></div>
-      </div>
-      <div class="row">
-        <div class="label">累计应发工资</div>
-        <div class="value readonly" id="cumIncome">0.00</div>
-      </div>
-      <div class="row">
-        <div class="label">累计社保公积金（个人）</div>
-        <div class="value readonly" id="cumSocialFund">0.00</div>
-      </div>
-      <div class="row">
-        <div class="label">累计个人所得税</div>
-        <div class="value readonly" id="cumTax">0.00</div>
-      </div>
-    </div>
-
     <div class="faq">
       <div class="title">常见问题：</div>
       <div class="q">1. 问：这个月个税比上个月交的多？</div>
@@ -535,20 +516,6 @@
     return { salaryStandard:salaryStandard, performancePay:performancePay, incomeTotal:incomeTotal, deductTotal:deductTotal, companyTotal:companyTotal, actualPaid:actualPaid };
   }
 
-  function cumulativeThrough(key){
-    var year = key.slice(0,4);
-    var keysInYear = monthKeys.filter(function(k){ return k.slice(0,4)===year && k<=key; });
-    var cumIncome=0, cumSocialFund=0, cumTax=0;
-    keysInYear.forEach(function(k){
-      var r = getRecord(k);
-      var t = deriveTotals(r);
-      cumIncome += t.incomeTotal;
-      cumSocialFund += r.socialPersonal + r.fundPersonal;
-      cumTax += r.tax;
-    });
-    return { cumIncome:cumIncome, cumSocialFund:cumSocialFund, cumTax:cumTax };
-  }
-
   function loadMonth(key){
     current = key;
     var r = getRecord(key);
@@ -580,11 +547,6 @@
     setRowVisible(document.getElementById('specialIncentiveRow'), r.specialIncentive !== 0);
     fixLastVisibleBorder(document.getElementById('performanceCard'));
     fixLastVisibleBorder(document.getElementById('specialIncentiveRow').closest('.card'));
-
-    var c = cumulativeThrough(current);
-    document.getElementById('cumIncome').textContent = money(c.cumIncome);
-    document.getElementById('cumSocialFund').textContent = money(c.cumSocialFund);
-    document.getElementById('cumTax').textContent = money(c.cumTax);
   }
 
   fields.forEach(function(f){
